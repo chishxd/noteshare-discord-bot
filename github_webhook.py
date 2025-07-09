@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import httpx
+import os
 
 app = FastAPI()
 
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1392426853817651281/K8zpqese70LKLdyq1ZShDogCvOSZHGkz_Ga_dyYFr872zL2vuhzV9s8FneZpd6oEhyvc"
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 LABEL_FILTER = "bug"  # Change this to your label
 
 @app.post("/github-webhook")
@@ -23,7 +24,7 @@ async def github_webhook(request: Request):
             labels = [label["name"] for label in issue.get("labels", [])]
             if LABEL_FILTER in labels:
                 async with httpx.AsyncClient() as client:
-                    await client.post(DISCORD_WEBHOOK_URL, json={
+                    await client.post(DISCORD_WEBHOOK_URL, json={ # type: ignore
                         "content": f"📝 New issue with `{LABEL_FILTER}` label:\n"
                                    f"**{issue['title']}**\n{issue['html_url']}"
                     })
